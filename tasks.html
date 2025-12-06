@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任務日誌 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="tasks.html" class="nav-item active">任務日誌</a>
+                <a href="rewards.html" class="nav-item">任務獎勵設定</a>
+                <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
+            </div>
+            <!-- 任務日誌表單整合到導航區 -->
+            <div class="task-form">
+                <input type="text" id="taskTitle" placeholder="任務名稱" required>
+                <input type="date" id="taskDeadline" required>
+                <select id="taskPriority">
+                    <option value="high">高優先度</option>
+                    <option value="medium" selected>中優先度</option>
+                    <option value="low">低優先度</option>
+                </select>
+                <button id="addTaskBtn">新增任務</button>
+            </div>
+            <!-- 任務列表 -->
+            <div class="task-list" id="taskList"></div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 只更新任務相關的顯示
+            window.updateDisplay = function() {
+                updateTaskList();
+                updateScore();
+            };
+            
+            // 確保事件監聽器已綁定
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            if (addTaskBtn) {
+                addTaskBtn.addEventListener('click', addTask);
+            }
+            
+            // 按Enter鍵新增任務
+            const taskTitle = document.getElementById('taskTitle');
+            const taskDeadline = document.getElementById('taskDeadline');
+            
+            if (taskTitle) {
+                taskTitle.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addTask();
+                    }
+                });
+            }
+            
+            if (taskDeadline) {
+                taskDeadline.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addTask();
+                    }
+                });
+            }
+            
+            loadData();
+        });
+    </script>
+</body>
+</html>
+

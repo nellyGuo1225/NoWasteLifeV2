@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不廢人生實驗室 - 應用程式</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <main>
+            <!-- 任務日誌區塊 -->
+            <section class="task-section">
+                <h2>任務日誌</h2>
+                <div class="task-form">
+                    <input type="text" id="taskTitle" placeholder="任務名稱" required>
+                    <input type="date" id="taskDeadline" required>
+                    <select id="taskPriority">
+                        <option value="high">高優先度</option>
+                        <option value="medium" selected>中優先度</option>
+                        <option value="low">低優先度</option>
+                    </select>
+                    <button id="addTaskBtn">新增任務</button>
+                    <div class="task-list" id="taskList"></div>
+                </div>
+               
+            </section>
+
+            <!-- 獎勵設定區塊 -->
+            <section class="reward-section">
+                <h2>任務獎勵設定</h2>
+                <div class="reward-form">
+                    <input type="text" id="rewardName" placeholder="獎勵名稱">
+                    <button id="addRewardBtn">新增獎勵</button>
+                </div>
+                <div class="reward-info">
+                    <span>未領取獎勵：<span id="rewardCount">0</span>/20</span>
+                </div>
+                <div class="reward-list" id="rewardList"></div>
+            </section>
+
+            <!-- 扭蛋區塊 -->
+            <section class="gacha-section">
+                <h2>任務獎勵扭蛋</h2>
+                <div class="gacha-display">
+                    <div class="gacha-machine" id="gachaMachine">
+                        <div class="gacha-ball"></div>
+                    </div>
+                    <button id="gachaBtn" class="gacha-button" disabled>抽獎（需要20分）</button>
+                </div>
+                <div class="gacha-result" id="gachaResult"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
+

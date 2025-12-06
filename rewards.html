@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任務獎勵設定 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="tasks.html" class="nav-item">任務日誌</a>
+                <a href="rewards.html" class="nav-item active">任務獎勵設定</a>
+                <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
+            </div>
+            <!-- 獎勵設定表單整合到導航區 -->
+            <div class="reward-form">
+                <input type="text" id="rewardName" placeholder="獎勵名稱">
+                <button id="addRewardBtn">新增獎勵</button>
+            </div>
+            <div class="reward-info">
+                <span>未領取獎勵：<span id="rewardCount">0</span>/20</span>
+            </div>
+            <!-- 獎勵列表 -->
+            <div class="reward-list" id="rewardList"></div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 只更新獎勵相關的顯示
+            window.updateDisplay = function() {
+                updateRewardList();
+                updateScore();
+            };
+            loadData();
+        });
+    </script>
+</body>
+</html>
+

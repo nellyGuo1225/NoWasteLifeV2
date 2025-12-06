@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任務獎勵扭蛋 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="tasks.html" class="nav-item">任務日誌</a>
+                <a href="rewards.html" class="nav-item">任務獎勵設定</a>
+                <a href="gacha.html" class="nav-item active">任務獎勵扭蛋</a>
+            </div>
+            <!-- 扭蛋顯示整合到導航區 -->
+            <div class="gacha-display">
+                <div class="gacha-machine" id="gachaMachine">
+                    <div class="gacha-ball"></div>
+                </div>
+                <button id="gachaBtn" class="gacha-button" disabled>抽獎（需要20分）</button>
+            </div>
+            <!-- 扭蛋結果 -->
+            <div class="gacha-result" id="gachaResult"></div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 只更新扭蛋相關的顯示
+            window.updateDisplay = function() {
+                updateScore();
+                updateGachaButton();
+            };
+            loadData();
+        });
+    </script>
+</body>
+</html>
+
