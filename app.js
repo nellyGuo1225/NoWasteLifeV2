@@ -1,3 +1,8 @@
+// API 配置 - 根據環境自動切換
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : window.location.origin; // 生產環境使用相同域名
+
 // 數據模型
 let tasks = [];
 let rewards = [];
@@ -938,7 +943,7 @@ async function startDiagnosis() {
     resultDiv.style.display = 'none';
     
     try {
-        const response = await fetch('http://localhost:5000/api/diagnose-procrastination', {
+        const response = await fetch(`${API_BASE_URL}/api/diagnose-procrastination`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1200,7 +1205,7 @@ async function breakdownTaskWithAI() {
     try {
         console.log('發送請求到後端...');
         // 調用後端 API
-        const response = await fetch('http://localhost:5000/api/breakdown-task', {
+        const response = await fetch(`${API_BASE_URL}/api/breakdown-task`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1241,7 +1246,7 @@ async function breakdownTaskWithAI() {
                     <p><strong>❌ 錯誤：</strong>${errorMessage}</p>
                     <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
                         請檢查：<br>
-                        1. 後端服務器是否在運行（http://localhost:5000）<br>
+                        1. 後端服務器是否在運行（${API_BASE_URL}）<br>
                         2. 瀏覽器控制台是否有更多錯誤訊息<br>
                         3. 網絡連接是否正常
                     </p>

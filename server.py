@@ -22,15 +22,20 @@ else:
     load_dotenv()
 
 app = Flask(__name__)
-# 配置 CORS，明確允許來自前端服務器的請求
+
+# 獲取環境變數，支持生產環境
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8000')
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', f'{FRONTEND_URL},http://127.0.0.1:8000').split(',')
+
+# 配置 CORS，支持開發和生產環境
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:8000", "http://127.0.0.1:8000"],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     },
     r"/health": {
-        "origins": ["http://localhost:8000", "http://127.0.0.1:8000"],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "OPTIONS"]
     }
 })
@@ -489,5 +494,7 @@ def health():
 if __name__ == '__main__':
     print("啟動 AI 任務拆解服務器...")
     print(f"Gemini API Key 已配置: {bool(GEMINI_API_KEY)}")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug)
 
