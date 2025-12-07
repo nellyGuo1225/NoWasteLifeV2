@@ -24,10 +24,11 @@
                 <div class="task-form">
                     <input type="text" id="taskTitle" placeholder="任務名稱" required>
                     <input type="date" id="taskDeadline" required>
-                    <select id="taskPriority">
-                        <option value="high">高優先度</option>
-                        <option value="medium" selected>中優先度</option>
-                        <option value="low">低優先度</option>
+                    <select id="taskPriority" required>
+                        <option value="" selected>請選擇優先度</option>
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
                     </select>
                     <button id="addTaskBtn">新增任務</button>
                     <div class="task-list" id="taskList"></div>
@@ -37,7 +38,7 @@
 
             <!-- 獎勵設定區塊 -->
             <section class="reward-section">
-                <h2>任務獎勵設定</h2>
+                <h2>獎勵設定</h2>
                 <div class="reward-form">
                     <input type="text" id="rewardName" placeholder="獎勵名稱">
                     <button id="addRewardBtn">新增獎勵</button>

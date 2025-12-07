@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 功能測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>AI 任務拆解功能測試</h1>
+    
+    <div class="test-section">
+        <h2>1. 測試後端服務器連接</h2>
+        <button onclick="testBackend()">測試後端 (http://localhost:5000/health)</button>
+        <div id="backend-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 測試 AI API</h2>
+        <input type="text" id="testTask" value="完成專案報告" style="width: 300px; padding: 8px;">
+        <button onclick="testAI()">測試 AI 拆解</button>
+        <div id="ai-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 檢查控制台</h2>
+        <p>請打開瀏覽器開發者工具 (F12) 查看控制台訊息</p>
+    </div>
+
+    <script>
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '測試中...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✅ 後端服務器正常</span><br>狀態: ${data.status}<br>Gemini 配置: ${data.gemini_configured}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ 無法連接後端服務器</span><br>錯誤: ${error.message}`;
+            }
+        }
+        
+        async function testAI() {
+            const taskInput = document.getElementById('testTask');
+            const taskText = taskInput.value.trim();
+            const resultDiv = document.getElementById('ai-result');
+            
+            if (!taskText) {
+                resultDiv.innerHTML = '<span class="error">請輸入任務</span>';
+                return;
+            }
+            
+            resultDiv.innerHTML = 'AI 思考中...';
+            console.log('發送請求:', taskText);
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/breakdown-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ task: taskText })
+                });
+                
+                console.log('回應狀態:', response.status);
+                const data = await response.json();
+                console.log('回應數據:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.error || '請求失敗');
+                }
+                
+                if (data.subtasks && data.subtasks.length > 0) {
+                    let html = '<span class="success">✅ AI 拆解成功！</span><br><br>';
+                    html += `共 ${data.subtasks.length} 個子任務：<br><ul>`;
+                    data.subtasks.forEach((subtask, index) => {
+                        html += `<li><strong>${index + 1}. ${subtask.title || subtask}</strong>`;
+                        if (subtask.description) {
+                            html += `<br>&nbsp;&nbsp;${subtask.description}`;
+                        }
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<span class="error">❌ 未獲得有效的子任務</span>';
+                }
+            } catch (error) {
+                console.error('錯誤:', error);
+                resultDiv.innerHTML = `<span class="error">❌ 錯誤: ${error.message}</span>`;
+            }
+        }
+        
+        // 頁面載入時自動測試後端
+        window.addEventListener('load', () => {
+            testBackend();
+        });
+    </script>
+</body>
+</html>
+

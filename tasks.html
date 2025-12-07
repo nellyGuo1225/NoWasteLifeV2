@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>任務日誌 - 不廢人生實驗室</title>
-    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="app.css?v=2.0">
 </head>
 <body>
     <div class="container">
@@ -19,63 +19,257 @@
 
         <nav class="page-nav">
             <div class="nav-tabs">
+                <a href="fun.html" class="nav-item">趣味一下</a>
                 <a href="tasks.html" class="nav-item active">任務日誌</a>
-                <a href="rewards.html" class="nav-item">任務獎勵設定</a>
+                <a href="ai-breakdown.html" class="nav-item">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item">獎勵設定</a>
                 <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
             </div>
+            
             <!-- 任務日誌表單整合到導航區 -->
-            <div class="task-form">
-                <input type="text" id="taskTitle" placeholder="任務名稱" required>
-                <input type="date" id="taskDeadline" required>
-                <select id="taskPriority">
-                    <option value="high">高優先度</option>
-                    <option value="medium" selected>中優先度</option>
-                    <option value="low">低優先度</option>
-                </select>
-                <button id="addTaskBtn">新增任務</button>
+            <div class="task-form batch-form" id="batchTaskForm">
+                <div class="batch-task-items" id="batchTaskItems">
+                    <!-- 動態添加的任務輸入框組會插入這裡 -->
+                </div>
+                <div class="batch-form-actions">
+                    <button type="button" id="addBatchTaskRowBtn" class="btn-add-row">+ 新增一行</button>
+                    <button type="button" id="addBatchTaskBtn" class="btn-submit-batch">批次新增</button>
+                </div>
             </div>
-            <!-- 任務列表 -->
-            <div class="task-list" id="taskList"></div>
+            <!-- 任務列表區塊（包含篩選條件和任務列表） -->
+            <div class="task-list-section">
+                <!-- 任務篩選 -->
+                <div class="task-filter">
+                    <div class="filter-group">
+                        <span class="filter-label">完成狀態：</span>
+                        <button class="filter-btn" data-filter="all" data-type="status">全部</button>
+                        <button class="filter-btn active" data-filter="pending" data-type="status">未完成</button>
+                        <button class="filter-btn" data-filter="completed" data-type="status">已完成</button>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">優先度：</span>
+                        <button class="filter-btn" data-filter="all" data-type="priority">全部</button>
+                        <button class="filter-btn" data-filter="low" data-type="priority">低</button>
+                        <button class="filter-btn" data-filter="medium" data-type="priority">中</button>
+                        <button class="filter-btn active" data-filter="high" data-type="priority">高</button>
+                    </div>
+                </div>
+                <!-- 任務列表 -->
+                <div class="task-list" id="taskList"></div>
+            </div>
         </nav>
+    </div>
+
+    <!-- 完成感受選擇彈窗 -->
+    <div id="feelingModal" class="modal">
+        <div class="modal-content feeling-modal-content">
+            <div class="modal-header">
+                <h2>完成任務的感受</h2>
+                <span class="modal-close" onclick="closeFeelingModal()">&times;</span>
+            </div>
+            <div class="modal-body feeling-modal-body">
+                <p class="feeling-prompt">請選擇完成這個任務時的感受：</p>
+                <div class="feeling-options" id="feelingOptions">
+                    <button class="feeling-option" data-feeling="🎉 超級爽！完成得很滿意">🎉 超級爽！完成得很滿意</button>
+                    <button class="feeling-option" data-feeling="🙂 心情輕鬆、鬆一口氣">🙂 心情輕鬆、鬆一口氣</button>
+                    <button class="feeling-option" data-feeling="😌 穩穩地完成，感覺不錯">😌 穩穩地完成，感覺不錯</button>
+                    <button class="feeling-option" data-feeling="😁 小小成就感">😁 小小成就感</button>
+                    <button class="feeling-option" data-feeling="🤔 普通，沒有特別感覺">🤔 普通，沒有特別感覺</button>
+                    <button class="feeling-option" data-feeling="😮‍💨 有點累但還是完成了">😮‍💨 有點累但還是完成了</button>
+                    <button class="feeling-option" data-feeling="😓 勉強完成，壓力還在">😓 勉強完成，壓力還在</button>
+                    <button class="feeling-option" data-feeling="😤 有點挫折，但至少做完">😤 有點挫折，但至少做完</button>
+                    <button class="feeling-option" data-feeling="😠 做完了但不太滿意">😠 做完了但不太滿意</button>
+                    <button class="feeling-option" data-feeling="😍 完成得比預期更好，非常開心！">😍 完成得比預期更好，非常開心！</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯任務彈窗 -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>編輯任務</h2>
+                <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-form">
+                    <label for="modalEditTitle">任務名稱：</label>
+                    <input type="text" id="modalEditTitle" placeholder="任務名稱" required>
+                    
+                    <label for="modalEditDeadline">截止日期：</label>
+                    <input type="date" id="modalEditDeadline" required>
+                    
+                    <label for="modalEditPriority">優先度：</label>
+                    <select id="modalEditPriority" required>
+                        <option value="" selected>請選擇優先度</option>
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-save" onclick="saveTaskFromModal()">保存</button>
+                <button class="btn-cancel" onclick="closeEditModal()">取消</button>
+                <button class="btn-delete" onclick="deleteTaskFromModal()">刪除</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
     <script>
         // 頁面特定的初始化
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Tasks 頁面初始化...');
+            
             // 只更新任務相關的顯示
             window.updateDisplay = function() {
                 updateTaskList();
                 updateScore();
             };
             
-            // 確保事件監聽器已綁定
-            const addTaskBtn = document.getElementById('addTaskBtn');
-            if (addTaskBtn) {
-                addTaskBtn.addEventListener('click', addTask);
-            }
-            
-            // 按Enter鍵新增任務
-            const taskTitle = document.getElementById('taskTitle');
-            const taskDeadline = document.getElementById('taskDeadline');
-            
-            if (taskTitle) {
-                taskTitle.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        addTask();
-                    }
-                });
-            }
-            
-            if (taskDeadline) {
-                taskDeadline.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        addTask();
-                    }
-                });
-            }
-            
             loadData();
+            
+            // 檢查是否有從 AI 拆解頁面傳來的任務標題（添加到批次新增表單的第一行）
+            const pendingTaskTitle = sessionStorage.getItem('pendingTaskTitle');
+            if (pendingTaskTitle) {
+                const batchTaskItems = document.getElementById('batchTaskItems');
+                if (batchTaskItems && batchTaskItems.children.length > 0) {
+                    const firstRow = batchTaskItems.children[0];
+                    const titleInput = firstRow.querySelector('.batch-task-title');
+                    if (titleInput) {
+                        titleInput.value = pendingTaskTitle;
+                        titleInput.focus();
+                    }
+                }
+                sessionStorage.removeItem('pendingTaskTitle');
+            }
+            
+            // 檢查是否有從 AI 拆解頁面傳來的批量任務
+            const pendingTasks = sessionStorage.getItem('pendingTasks');
+            if (pendingTasks) {
+                try {
+                    const data = JSON.parse(pendingTasks);
+                    if (data.message) {
+                        alert(data.message);
+                    }
+                    // 任務已經在 loadData() 中加載了，這裡只需要更新顯示
+                    updateDisplay();
+                    sessionStorage.removeItem('pendingTasks');
+                } catch (e) {
+                    console.error('解析待處理任務失敗:', e);
+                }
+            }
+            
+            // 設置優先度選擇器
+            if (window.setupPrioritySelectors) {
+                setupPrioritySelectors();
+            } else {
+                // 如果函數還沒加載，等待一下再調用
+                setTimeout(() => {
+                    if (window.setupPrioritySelectors) {
+                        setupPrioritySelectors();
+                    }
+                }, 100);
+            }
+            
+            // 設置任務篩選按鈕事件
+            document.querySelectorAll('.filter-btn[data-type="status"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    setTaskStatusFilter(filter);
+                });
+            });
+            
+            document.querySelectorAll('.filter-btn[data-type="priority"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    setTaskPriorityFilter(filter);
+                });
+            });
+            
+            // 初始化篩選狀態（預設為未完成、高優先度）
+            setTaskStatusFilter('pending');
+            setTaskPriorityFilter('high');
+            
+            // 批次新增按鈕
+            const addBatchTaskBtn = document.getElementById('addBatchTaskBtn');
+            if (addBatchTaskBtn) {
+                console.log('批次新增按鈕已找到，綁定事件監聽器');
+                addBatchTaskBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('批次新增按鈕被點擊');
+                    if (typeof addBatchTasks === 'function') {
+                        console.log('調用 addBatchTasks 函數');
+                        addBatchTasks();
+                    } else {
+                        console.error('addBatchTasks 函數未定義');
+                        alert('批次新增功能未正確加載，請刷新頁面重試');
+                    }
+                });
+            } else {
+                console.error('找不到批次新增按鈕');
+            }
+            
+            // 新增一行按鈕
+            const addBatchTaskRowBtn = document.getElementById('addBatchTaskRowBtn');
+            if (addBatchTaskRowBtn) {
+                addBatchTaskRowBtn.addEventListener('click', () => {
+                    if (typeof addBatchTaskRow === 'function') {
+                        addBatchTaskRow();
+                    }
+                });
+            }
+            
+            // 初始化批次新增表單時添加第一行
+            const batchTaskForm = document.getElementById('batchTaskForm');
+            const batchTaskItems = document.getElementById('batchTaskItems');
+            if (batchTaskForm && batchTaskItems && batchTaskItems.children.length === 0) {
+                if (typeof addBatchTaskRow === 'function') {
+                    addBatchTaskRow();
+                }
+            }
+            
+            // 點擊彈窗外部關閉彈窗
+            const editModal = document.getElementById('editTaskModal');
+            if (editModal) {
+                editModal.addEventListener('click', function(e) {
+                    if (e.target === editModal) {
+                        closeEditModal();
+                    }
+                });
+            }
+            
+            // ESC 鍵關閉彈窗
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                    closeFeelingModal();
+                }
+            });
+            
+            // 點擊感受選擇彈窗外部關閉
+            const feelingModal = document.getElementById('feelingModal');
+            if (feelingModal) {
+                feelingModal.addEventListener('click', function(e) {
+                    if (e.target === feelingModal) {
+                        closeFeelingModal();
+                    }
+                });
+            }
+            
+            // 綁定感受選擇按鈕
+            document.querySelectorAll('.feeling-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const feeling = this.getAttribute('data-feeling');
+                    selectFeelingAndComplete(feeling);
+                });
+            });
+            
+            console.log('Tasks 頁面初始化完成');
         });
     </script>
 </body>

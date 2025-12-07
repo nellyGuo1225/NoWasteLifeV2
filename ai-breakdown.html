@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 任務拆解 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="fun.html" class="nav-item">趣味一下</a>
+                <a href="tasks.html" class="nav-item">任務日誌</a>
+                <a href="ai-breakdown.html" class="nav-item active">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item">獎勵設定</a>
+                <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
+            </div>
+            
+            <!-- AI 任務拆解區域 -->
+            <div class="ai-breakdown-section">
+                <div class="ai-breakdown-header">
+                    <h3>🤖 AI 任務拆解</h3>
+                    <p>輸入一個大任務，AI 會幫您拆解成多個子任務，然後可以一鍵加入任務列表</p>
+                </div>
+                <div class="ai-breakdown-form">
+                    <input type="text" id="aiTaskInput" placeholder="例如：完成專案報告、學習新技能、規劃旅行...">
+                    <button id="aiBreakdownBtn" class="btn-ai">✨ AI 拆解任務</button>
+                </div>
+                <div id="aiLoading" class="ai-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>AI 正在思考中...</span>
+                </div>
+                <div id="aiResult" class="ai-result" style="display: none;"></div>
+            </div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AI 任務拆解頁面初始化...');
+            
+            // 更新顯示函數（只更新積分）
+            window.updateDisplay = function() {
+                updateScore();
+            };
+            
+            // AI 任務拆解按鈕
+            const aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
+            if (aiBreakdownBtn) {
+                console.log('綁定 AI 拆解按鈕');
+                aiBreakdownBtn.addEventListener('click', breakdownTaskWithAI);
+            } else {
+                console.error('找不到 AI 拆解按鈕');
+            }
+            
+            // AI 任務輸入框 Enter 鍵
+            const aiTaskInput = document.getElementById('aiTaskInput');
+            if (aiTaskInput) {
+                aiTaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        breakdownTaskWithAI();
+                    }
+                });
+            }
+            
+            loadData();
+            
+            // 設置優先度選擇器
+            if (window.setupPrioritySelectors) {
+                setupPrioritySelectors();
+            } else {
+                // 如果函數還沒加載，等待一下再調用
+                setTimeout(() => {
+                    if (window.setupPrioritySelectors) {
+                        setupPrioritySelectors();
+                    }
+                }, 100);
+            }
+            
+            console.log('AI 任務拆解頁面初始化完成');
+        });
+    </script>
+</body>
+</html>
+

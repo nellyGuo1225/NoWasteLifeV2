@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味一下 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="fun.html" class="nav-item active">趣味一下</a>
+                <a href="tasks.html" class="nav-item">任務日誌</a>
+                <a href="ai-breakdown.html" class="nav-item">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item">獎勵設定</a>
+                <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
+            </div>
+            
+            <!-- 趣味一下功能區域 -->
+            <div class="fun-section">
+                <!-- 任務盲盒 -->
+                <div class="fun-card">
+                    <h3>📦 任務盲盒</h3>
+                    <p class="fun-description">隨機抽取一個未完成的任務，讓任務更有趣！</p>
+                    <button id="drawTaskBtn" class="fun-button">抽取任務</button>
+                    <div id="taskResult" class="fun-result" style="display: none;">
+                        <div class="result-content">
+                            <h4>抽到的任務：</h4>
+                            <p id="drawnTaskTitle" class="drawn-task-title"></p>
+                            <p id="drawnTaskInfo" class="drawn-task-info"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 今日梗圖 -->
+                <div class="fun-card">
+                    <h3>😄 今日梗圖</h3>
+                    <p class="fun-description">隨機抽取一張有趣的梗圖，放鬆一下心情！</p>
+                    <button id="drawMemeBtn" class="fun-button">抽取梗圖</button>
+                    <div id="memeResult" class="fun-result" style="display: none;">
+                        <div class="result-content">
+                            <img id="memeImage" src="" alt="梗圖" class="meme-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('趣味一下頁面初始化...');
+            
+            window.updateDisplay = function() {
+                updateScore();
+            };
+            
+            // 任務盲盒按鈕
+            const drawTaskBtn = document.getElementById('drawTaskBtn');
+            if (drawTaskBtn) {
+                drawTaskBtn.addEventListener('click', drawRandomTask);
+            }
+            
+            // 梗圖按鈕
+            const drawMemeBtn = document.getElementById('drawMemeBtn');
+            if (drawMemeBtn) {
+                drawMemeBtn.addEventListener('click', drawRandomMeme);
+            }
+            
+            loadData();
+            console.log('趣味一下頁面初始化完成');
+        });
+        
+        // 抽取隨機任務
+        function drawRandomTask() {
+            const uncompletedTasks = tasks.filter(task => !task.completed);
+            
+            if (uncompletedTasks.length === 0) {
+                alert('目前沒有未完成的任務！');
+                return;
+            }
+            
+            // 隨機抽取一個任務
+            const randomIndex = Math.floor(Math.random() * uncompletedTasks.length);
+            const drawnTask = uncompletedTasks[randomIndex];
+            
+            // 顯示結果
+            const taskResult = document.getElementById('taskResult');
+            const drawnTaskTitle = document.getElementById('drawnTaskTitle');
+            const drawnTaskInfo = document.getElementById('drawnTaskInfo');
+            
+            if (taskResult && drawnTaskTitle && drawnTaskInfo) {
+                drawnTaskTitle.textContent = drawnTask.title;
+                
+                // 顯示任務詳情
+                const deadline = new Date(drawnTask.deadline);
+                const deadlineStr = deadline.toLocaleDateString('zh-TW', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const priorityMap = {
+                    'low': '低',
+                    'medium': '中',
+                    'high': '高'
+                };
+                
+                drawnTaskInfo.textContent = `截止日期：${deadlineStr} | 優先度：${priorityMap[drawnTask.priority] || drawnTask.priority}`;
+                taskResult.style.display = 'block';
+                
+                // 添加動畫效果
+                taskResult.style.animation = 'fadeInUp 0.5s ease-out';
+            }
+        }
+        
+        // 抽取隨機梗圖
+        function drawRandomMeme() {
+            const memeResult = document.getElementById('memeResult');
+            const memeImage = document.getElementById('memeImage');
+            
+            if (!memeResult || !memeImage) return;
+            
+            // 本地梗圖列表（根據 images/memes 資料夾中的圖片）
+            const memeImages = [
+                'images/memes/1.jpg',
+                'images/memes/2.jpg',
+                'images/memes/3.jpg',
+                'images/memes/4.jpg',
+                'images/memes/5.jpg',
+                'images/memes/6.jpg'
+            ];
+            
+            // 隨機選擇一張梗圖
+            const randomIndex = Math.floor(Math.random() * memeImages.length);
+            const selectedMeme = memeImages[randomIndex];
+            
+            // 顯示結果
+            memeImage.src = selectedMeme;
+            memeImage.alt = '今日梗圖';
+            memeResult.style.display = 'block';
+            memeResult.style.animation = 'fadeInUp 0.5s ease-out';
+        }
+    </script>
+</body>
+</html>
+

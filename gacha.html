@@ -19,20 +19,54 @@
 
         <nav class="page-nav">
             <div class="nav-tabs">
+                <a href="fun.html" class="nav-item">趣味一下</a>
                 <a href="tasks.html" class="nav-item">任務日誌</a>
-                <a href="rewards.html" class="nav-item">任務獎勵設定</a>
+                <a href="ai-breakdown.html" class="nav-item">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item">獎勵設定</a>
                 <a href="gacha.html" class="nav-item active">任務獎勵扭蛋</a>
             </div>
             <!-- 扭蛋顯示整合到導航區 -->
             <div class="gacha-display">
-                <div class="gacha-machine" id="gachaMachine">
-                    <div class="gacha-ball"></div>
+                <div class="gacha-machine" id="gachaMachine"></div>
+                <div class="gacha-buttons-wrapper">
+                    <div class="gacha-button-item">
+                        <div class="tooltip-container">
+                            <button id="normalGachaBtn" class="gacha-button" data-type="normal" disabled>一般抽獎</button>
+                            <span class="tooltip-text" id="normalGachaTooltip"></span>
+                        </div>
+                        <p class="gacha-note note-normal">一般抽獎為10~20積分抽一次</p>
+                    </div>
+                    <div class="gacha-button-item">
+                        <div class="tooltip-container">
+                            <button id="luxuryGachaBtn" class="gacha-button" data-type="luxury" disabled>豪華抽獎</button>
+                            <span class="tooltip-text" id="luxuryGachaTooltip"></span>
+                        </div>
+                        <p class="gacha-note note-luxury">豪華抽獎為50積分抽一次</p>
+                    </div>
+                    <div class="gacha-button-item">
+                        <div class="tooltip-container">
+                            <button id="premiumGachaBtn" class="gacha-button" data-type="premium" disabled>頂級抽獎</button>
+                            <span class="tooltip-text" id="premiumGachaTooltip"></span>
+                        </div>
+                        <p class="gacha-note note-premium">頂級抽獎為100積分抽一次</p>
+                    </div>
                 </div>
-                <button id="gachaBtn" class="gacha-button" disabled>抽獎（需要20分）</button>
             </div>
-            <!-- 扭蛋結果 -->
-            <div class="gacha-result" id="gachaResult"></div>
         </nav>
+    </div>
+
+    <!-- 抽獎結果彈窗 -->
+    <div id="gachaResultModal" class="gacha-modal">
+        <div class="gacha-modal-content">
+            <div class="confetti-container" id="confettiContainer"></div>
+            <div class="gacha-modal-body">
+                <div class="gacha-result-icon">🎉</div>
+                <h2 class="gacha-result-title">恭喜獲得！</h2>
+                <div class="gacha-result-reward" id="gachaResultReward"></div>
+                <button class="gacha-modal-close" onclick="closeGachaModal()">確定</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
@@ -44,6 +78,39 @@
                 updateScore();
                 updateGachaButton();
             };
+            
+            // 確保事件監聽器已綁定
+            const normalGachaBtn = document.getElementById('normalGachaBtn');
+            const luxuryGachaBtn = document.getElementById('luxuryGachaBtn');
+            const premiumGachaBtn = document.getElementById('premiumGachaBtn');
+            
+            if (normalGachaBtn) {
+                normalGachaBtn.addEventListener('click', () => drawGacha('normal'));
+            }
+            if (luxuryGachaBtn) {
+                luxuryGachaBtn.addEventListener('click', () => drawGacha('luxury'));
+            }
+            if (premiumGachaBtn) {
+                premiumGachaBtn.addEventListener('click', () => drawGacha('premium'));
+            }
+            
+            // 點擊彈窗外部關閉
+            const gachaModal = document.getElementById('gachaResultModal');
+            if (gachaModal) {
+                gachaModal.addEventListener('click', function(e) {
+                    if (e.target === gachaModal) {
+                        closeGachaModal();
+                    }
+                });
+            }
+            
+            // ESC 鍵關閉彈窗
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeGachaModal();
+                }
+            });
+            
             loadData();
         });
     </script>

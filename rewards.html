@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>任務獎勵設定 - 不廢人生實驗室</title>
+    <title>獎勵設定 - 不廢人生實驗室</title>
     <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -19,14 +19,22 @@
 
         <nav class="page-nav">
             <div class="nav-tabs">
+                <a href="fun.html" class="nav-item">趣味一下</a>
                 <a href="tasks.html" class="nav-item">任務日誌</a>
-                <a href="rewards.html" class="nav-item active">任務獎勵設定</a>
+                <a href="ai-breakdown.html" class="nav-item">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item active">獎勵設定</a>
                 <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
             </div>
             <!-- 獎勵設定表單整合到導航區 -->
-            <div class="reward-form">
-                <input type="text" id="rewardName" placeholder="獎勵名稱">
-                <button id="addRewardBtn">新增獎勵</button>
+            <div class="reward-form batch-form" id="batchRewardForm">
+                <div class="batch-reward-items" id="batchRewardItems">
+                    <!-- 動態添加的獎勵輸入框組會插入這裡 -->
+                </div>
+                <div class="batch-form-actions">
+                    <button type="button" id="addBatchRewardRowBtn" class="btn-add-row">+ 新增一行</button>
+                    <button type="button" id="addBatchRewardBtn" class="btn-submit-batch">批次新增</button>
+                </div>
             </div>
             <div class="reward-info">
                 <span>未領取獎勵：<span id="rewardCount">0</span>/20</span>
@@ -45,6 +53,32 @@
                 updateRewardList();
                 updateScore();
             };
+            
+            // 批次新增按鈕
+            const addBatchRewardBtn = document.getElementById('addBatchRewardBtn');
+            if (addBatchRewardBtn) {
+                addBatchRewardBtn.addEventListener('click', addBatchRewards);
+            }
+            
+            // 新增一行按鈕
+            const addBatchRewardRowBtn = document.getElementById('addBatchRewardRowBtn');
+            if (addBatchRewardRowBtn) {
+                addBatchRewardRowBtn.addEventListener('click', () => {
+                    if (typeof addBatchRewardRow === 'function') {
+                        addBatchRewardRow();
+                    }
+                });
+            }
+            
+            // 初始化批次新增表單時添加第一行
+            const batchRewardForm = document.getElementById('batchRewardForm');
+            const batchRewardItems = document.getElementById('batchRewardItems');
+            if (batchRewardForm && batchRewardItems && batchRewardItems.children.length === 0) {
+                if (typeof addBatchRewardRow === 'function') {
+                    addBatchRewardRow();
+                }
+            }
+            
             loadData();
         });
     </script>

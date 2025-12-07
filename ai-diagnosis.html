@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 拖延診斷 - 不廢人生實驗室</title>
+    <link rel="stylesheet" href="app.css?v=2.0">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>不廢人生實驗室</h1>
+            <div class="score-display">
+                <span class="score-label">當前積分：</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <a href="index.html" class="back-link">← 返回首頁</a>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-tabs">
+                <a href="fun.html" class="nav-item">趣味一下</a>
+                <a href="tasks.html" class="nav-item">任務日誌</a>
+                <a href="ai-breakdown.html" class="nav-item">AI 任務拆解</a>
+                <a href="ai-diagnosis.html" class="nav-item active">AI 拖延診斷</a>
+                <a href="rewards.html" class="nav-item">獎勵設定</a>
+                <a href="gacha.html" class="nav-item">任務獎勵扭蛋</a>
+            </div>
+            
+            <!-- AI 拖延診斷區域 -->
+            <div class="ai-diagnosis-section">
+                <div class="ai-diagnosis-header">
+                    <h3>🔍 AI 拖延診斷</h3>
+                    <p>根據您完成任務時的感受，AI 會分析您的拖延問題並提供改善建議</p>
+                </div>
+                <div class="ai-diagnosis-form">
+                    <button id="diagnosisBtn" class="btn-ai">✨ 開始診斷</button>
+                </div>
+                <div id="diagnosisLoading" class="ai-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>AI 正在分析中...</span>
+                </div>
+                <div id="diagnosisResult" class="ai-result" style="display: none;"></div>
+            </div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // 頁面特定的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AI 拖延診斷頁面初始化...');
+            
+            // 更新顯示函數（只更新積分）
+            window.updateDisplay = function() {
+                updateScore();
+            };
+            
+            // AI 診斷按鈕
+            const diagnosisBtn = document.getElementById('diagnosisBtn');
+            if (diagnosisBtn) {
+                console.log('綁定 AI 診斷按鈕');
+                diagnosisBtn.addEventListener('click', startDiagnosis);
+            } else {
+                console.error('找不到 AI 診斷按鈕');
+            }
+            
+            loadData();
+            console.log('AI 拖延診斷頁面初始化完成');
+        });
+    </script>
+</body>
+</html>
+
