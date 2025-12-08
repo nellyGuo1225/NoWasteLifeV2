@@ -229,8 +229,20 @@ def breakdown_task():
                 'suggestion': '嘗試使用 gemini-1.5-flash 或 gemini-1.5-pro'
             }), 500
         
-        if 'API key' in error_msg.lower() or 'authentication' in error_msg.lower():
-            return jsonify({'error': 'Gemini API Key 無效或已過期，請檢查 .env 文件'}), 500
+        # 處理 API key 相關錯誤
+        if 'API key' in error_msg.lower() or 'authentication' in error_msg.lower() or '403' in error_msg:
+            # 檢查是否是 API key 洩露錯誤
+            if 'leaked' in error_msg.lower():
+                return jsonify({
+                    'error': 'API Key 已被標記為洩露，請在 Google AI Studio 創建新的 API Key 並更新環境變數',
+                    'error_type': 'api_key_leaked',
+                    'solution': '1. 訪問 https://aistudio.google.com/apikey\n2. 刪除舊的 API Key\n3. 創建新的 API Key\n4. 在 Render 環境變數中更新 GEMINI_API_KEY'
+                }), 403
+            else:
+                return jsonify({
+                    'error': 'Gemini API Key 無效或已過期，請檢查環境變數設置',
+                    'error_type': 'api_key_invalid'
+                }), 500
         
         return jsonify({
             'error': f'處理請求時發生錯誤: {error_msg}',
@@ -461,6 +473,21 @@ def diagnose_procrastination():
                     "error_type": "quota_exceeded",
                     "retry_after": retry_seconds
                 }), 429
+            
+            # 處理 API key 相關錯誤
+            if 'API key' in error_msg.lower() or 'authentication' in error_msg.lower() or '403' in error_msg:
+                # 檢查是否是 API key 洩露錯誤
+                if 'leaked' in error_msg.lower():
+                    return jsonify({
+                        "error": "API Key 已被標記為洩露，請在 Google AI Studio 創建新的 API Key 並更新環境變數",
+                        "error_type": "api_key_leaked",
+                        "solution": "1. 訪問 https://aistudio.google.com/apikey\n2. 刪除舊的 API Key\n3. 創建新的 API Key\n4. 在 Render 環境變數中更新 GEMINI_API_KEY"
+                    }), 403
+                else:
+                    return jsonify({
+                        "error": "Gemini API Key 無效或已過期，請檢查環境變數設置",
+                        "error_type": "api_key_invalid"
+                    }), 500
             
             return jsonify({
                 "error": f"AI 分析失敗: {error_msg}",

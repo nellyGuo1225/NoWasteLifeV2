@@ -1066,6 +1066,16 @@ async function startDiagnosis() {
         if (!response.ok) {
             const errorMsg = data.error || '診斷失敗';
             
+            // 如果是 API key 洩露錯誤
+            if (response.status === 403 || data.error_type === 'api_key_leaked') {
+                throw new Error(`API Key 已被標記為洩露\n\n解決步驟：\n1. 訪問 https://aistudio.google.com/apikey\n2. 刪除舊的 API Key\n3. 創建新的 API Key\n4. 在 Render 環境變數中更新 GEMINI_API_KEY\n\n詳細說明請查看錯誤詳情`);
+            }
+            
+            // 如果是 API key 洩露錯誤
+            if (response.status === 403 || data.error_type === 'api_key_leaked') {
+                throw new Error(`API Key 已被標記為洩露\n\n解決步驟：\n1. 訪問 https://aistudio.google.com/apikey\n2. 刪除舊的 API Key\n3. 創建新的 API Key\n4. 在 Render 環境變數中更新 GEMINI_API_KEY\n\n詳細說明請查看錯誤詳情`);
+            }
+            
             // 如果是配額限制錯誤，顯示更友好的訊息
             if (response.status === 429 || data.error_type === 'quota_exceeded') {
                 let quotaMsg = 'API 配額已用完。免費層每天限制 20 次請求。';
@@ -1106,6 +1116,32 @@ async function startDiagnosis() {
                     測試後端連接
                 </button>
                 <div id="connection-test-result-diagnosis" style="margin-top: 10px;"></div>`;
+        }
+        // 檢查是否是 API key 洩露錯誤
+        else if (error.message.includes('API Key 已被標記為洩露') || error.message.includes('leaked') || error.message.includes('api_key_leaked')) {
+            errorMessage = 'API Key 已被標記為洩露';
+            errorDetails = `您的 Gemini API Key 已被 Google 標記為洩露，需要更換新的 API Key。<br><br>
+                <strong>解決步驟：</strong><br>
+                1. 訪問 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a><br>
+                2. 刪除舊的 API Key（如果還存在的話）<br>
+                3. 點擊 "Create API Key" 創建新的 API Key<br>
+                4. 複製新的 API Key<br>
+                5. 在 Render Dashboard → 您的服務 → Environment → 更新 GEMINI_API_KEY 環境變數<br>
+                6. 重新部署服務（或等待自動重新部署）<br><br>
+                <strong>注意：</strong> 請確保新的 API Key 不要提交到公開的 Git 倉庫中。`;
+        }
+        // 檢查是否是 API key 洩露錯誤
+        else if (error.message.includes('API Key 已被標記為洩露') || error.message.includes('leaked') || error.message.includes('api_key_leaked')) {
+            errorMessage = 'API Key 已被標記為洩露';
+            errorDetails = `您的 Gemini API Key 已被 Google 標記為洩露，需要更換新的 API Key。<br><br>
+                <strong>解決步驟：</strong><br>
+                1. 訪問 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a><br>
+                2. 刪除舊的 API Key（如果還存在的話）<br>
+                3. 點擊 "Create API Key" 創建新的 API Key<br>
+                4. 複製新的 API Key<br>
+                5. 在 Render Dashboard → 您的服務 → Environment → 更新 GEMINI_API_KEY 環境變數<br>
+                6. 重新部署服務（或等待自動重新部署）<br><br>
+                <strong>注意：</strong> 請確保新的 API Key 不要提交到公開的 Git 倉庫中。`;
         }
         // 檢查是否是配額限制錯誤
         else if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('配額')) {
@@ -1342,6 +1378,10 @@ async function breakdownTaskWithAI() {
         console.log('回應數據:', data);
         
         if (!response.ok) {
+            // 如果是 API key 洩露錯誤
+            if (response.status === 403 || data.error_type === 'api_key_leaked') {
+                throw new Error(`API Key 已被標記為洩露\n\n解決步驟：\n1. 訪問 https://aistudio.google.com/apikey\n2. 刪除舊的 API Key\n3. 創建新的 API Key\n4. 在 Render 環境變數中更新 GEMINI_API_KEY\n\n詳細說明請查看錯誤詳情`);
+            }
             throw new Error(data.error || `請求失敗 (狀態碼: ${response.status})`);
         }
         
@@ -1373,6 +1413,19 @@ async function breakdownTaskWithAI() {
                 2. 瀏覽器控制台是否有更多錯誤訊息<br>
                 3. 網絡連接是否正常<br>
                 4. 後端服務器日誌是否有錯誤`;
+        }
+        // 檢查是否是 API key 洩露錯誤
+        else if (error.message.includes('API Key 已被標記為洩露') || error.message.includes('leaked') || error.message.includes('api_key_leaked')) {
+            errorMessage = 'API Key 已被標記為洩露';
+            errorDetails = `您的 Gemini API Key 已被 Google 標記為洩露，需要更換新的 API Key。<br><br>
+                <strong>解決步驟：</strong><br>
+                1. 訪問 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a><br>
+                2. 刪除舊的 API Key（如果還存在的話）<br>
+                3. 點擊 "Create API Key" 創建新的 API Key<br>
+                4. 複製新的 API Key<br>
+                5. 在 Render Dashboard → 您的服務 → Environment → 更新 GEMINI_API_KEY 環境變數<br>
+                6. 重新部署服務（或等待自動重新部署）<br><br>
+                <strong>注意：</strong> 請確保新的 API Key 不要提交到公開的 Git 倉庫中。`;
         }
         // 檢查是否是網絡連接錯誤
         else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
