@@ -921,6 +921,43 @@ function closeGachaModal() {
     }
 }
 
+// 安全地解析 JSON 響應
+async function safeJsonParse(response) {
+    try {
+        // 檢查響應是否有內容
+        const contentType = response.headers.get('content-type');
+        const text = await response.text();
+        
+        // 如果響應為空
+        if (!text || text.trim().length === 0) {
+            throw new Error('服務器返回空響應');
+        }
+        
+        // 檢查 Content-Type 是否為 JSON
+        if (contentType && !contentType.includes('application/json')) {
+            console.error('非 JSON 響應，Content-Type:', contentType);
+            console.error('響應內容前 500 字元:', text.substring(0, 500));
+            throw new Error(`服務器返回非 JSON 格式的響應 (${contentType})`);
+        }
+        
+        // 嘗試解析 JSON
+        try {
+            return JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON 解析失敗:', parseError);
+            console.error('響應內容前 500 字元:', text.substring(0, 500));
+            throw new Error(`JSON 解析失敗: ${parseError.message}`);
+        }
+    } catch (error) {
+        // 如果是我們自己拋出的錯誤，直接重新拋出
+        if (error.message.includes('服務器返回') || error.message.includes('JSON 解析失敗')) {
+            throw error;
+        }
+        // 其他錯誤（如網絡錯誤）
+        throw error;
+    }
+}
+
 // 開始 AI 拖延診斷
 async function startDiagnosis() {
     const diagnosisBtn = document.getElementById('diagnosisBtn');
@@ -959,15 +996,17 @@ async function startDiagnosis() {
             })
         });
         
+        // 安全地解析響應
+        const data = await safeJsonParse(response);
+        
         if (!response.ok) {
-            const errorData = await response.json();
-            const errorMsg = errorData.error || '診斷失敗';
+            const errorMsg = data.error || '診斷失敗';
             
             // 如果是配額限制錯誤，顯示更友好的訊息
-            if (response.status === 429 || errorData.error_type === 'quota_exceeded') {
+            if (response.status === 429 || data.error_type === 'quota_exceeded') {
                 let quotaMsg = 'API 配額已用完。免費層每天限制 20 次請求。';
-                if (errorData.retry_after) {
-                    quotaMsg += ` 請在 ${Math.ceil(parseFloat(errorData.retry_after))} 秒後重試。`;
+                if (data.retry_after) {
+                    quotaMsg += ` 請在 ${Math.ceil(parseFloat(data.retry_after))} 秒後重試。`;
                 } else {
                     quotaMsg += ' 請稍後再試或明天再使用此功能。';
                 }
@@ -977,7 +1016,6 @@ async function startDiagnosis() {
             throw new Error(errorMsg);
         }
         
-        const data = await response.json();
         displayDiagnosisResult(data);
         
     } catch (error) {
@@ -986,8 +1024,23 @@ async function startDiagnosis() {
         let errorMessage = error.message;
         let errorDetails = '請確認後端服務是否正常運行';
         
+        // 檢查是否是 JSON 解析錯誤
+        if (error.message.includes('JSON 解析失敗') || error.message.includes('Unexpected end of JSON input') || 
+            error.message.includes('服務器返回空響應') || error.message.includes('非 JSON 格式')) {
+            errorMessage = '無法解析服務器響應';
+            errorDetails = `後端服務器可能未正常運行或返回了無效的響應。請檢查：<br>
+                1. 後端服務器是否在運行（${API_BASE_URL}）<br>
+                2. 瀏覽器控制台是否有更多錯誤訊息<br>
+                3. 網絡連接是否正常<br>
+                4. 後端服務器日誌是否有錯誤`;
+        }
+        // 檢查是否是網絡連接錯誤
+        else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = '無法連接到後端服務器';
+            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}`;
+        }
         // 檢查是否是配額限制錯誤
-        if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('配額')) {
+        else if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('配額')) {
             errorDetails = 'API 配額已用完。免費層每天限制 20 次請求。請稍後再試或明天再使用此功能。';
         }
         
@@ -1214,8 +1267,10 @@ async function breakdownTaskWithAI() {
         });
         
         console.log('收到回應，狀態碼:', response.status);
+        console.log('回應 Content-Type:', response.headers.get('content-type'));
         
-        const data = await response.json();
+        // 安全地解析響應
+        const data = await safeJsonParse(response);
         console.log('回應數據:', data);
         
         if (!response.ok) {
@@ -1236,20 +1291,32 @@ async function breakdownTaskWithAI() {
         console.error('錯誤詳情:', error.message, error.stack);
         
         let errorMessage = error.message;
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMessage = '無法連接到後端服務器。請確認後端服務器已啟動（運行 python server.py）';
+        let errorDetails = `請檢查：<br>
+            1. 後端服務器是否在運行（${API_BASE_URL}）<br>
+            2. 瀏覽器控制台是否有更多錯誤訊息<br>
+            3. 網絡連接是否正常`;
+        
+        // 檢查是否是 JSON 解析錯誤
+        if (error.message.includes('JSON 解析失敗') || error.message.includes('Unexpected end of JSON input') || 
+            error.message.includes('服務器返回空響應') || error.message.includes('非 JSON 格式')) {
+            errorMessage = '無法解析服務器響應';
+            errorDetails = `後端服務器可能未正常運行或返回了無效的響應。請檢查：<br>
+                1. 後端服務器是否在運行（${API_BASE_URL}）<br>
+                2. 瀏覽器控制台是否有更多錯誤訊息<br>
+                3. 網絡連接是否正常<br>
+                4. 後端服務器日誌是否有錯誤`;
+        }
+        // 檢查是否是網絡連接錯誤
+        else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = '無法連接到後端服務器';
+            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}`;
         }
         
         if (resultDiv) {
             resultDiv.innerHTML = `
                 <div class="ai-error">
                     <p><strong>❌ 錯誤：</strong>${errorMessage}</p>
-                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                        請檢查：<br>
-                        1. 後端服務器是否在運行（${API_BASE_URL}）<br>
-                        2. 瀏覽器控制台是否有更多錯誤訊息<br>
-                        3. 網絡連接是否正常
-                    </p>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">${errorDetails}</p>
                 </div>
             `;
             resultDiv.style.display = 'block';
