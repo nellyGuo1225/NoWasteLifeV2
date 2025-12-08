@@ -1512,9 +1512,8 @@ function displayBreakdownResult(subtasks, originalTask = '') {
                         <div class="subtask-setting-item">
                             <label>⚡ 優先度：</label>
                             <select class="subtask-priority" data-index="${index}" required>
-                                <option value="" selected>請選擇優先度</option>
                                 <option value="low">低</option>
-                                <option value="medium">中</option>
+                                <option value="medium" selected>中</option>
                                 <option value="high">高</option>
                             </select>
                         </div>
@@ -1558,12 +1557,11 @@ function displayBreakdownResult(subtasks, originalTask = '') {
                 const deadlineInput = resultDiv.querySelector(`.subtask-deadline[data-index="${index}"]`);
                 const prioritySelect = resultDiv.querySelector(`.subtask-priority[data-index="${index}"]`);
                 const deadline = deadlineInput ? deadlineInput.value : '';
-                const priority = prioritySelect ? prioritySelect.value : '';
+                let priority = prioritySelect ? prioritySelect.value : '';
                 
+                // 如果優先度為空，使用預設值「中」
                 if (!priority || priority === '') {
-                    alert('請選擇優先度！');
-                    if (prioritySelect) prioritySelect.focus();
-                    return;
+                    priority = 'medium';
                 }
                 
                 // 將按鈕元素和設定傳遞給函數
@@ -1735,16 +1733,9 @@ function addAllSubtasksAsTasks() {
                 return;
             }
             
+            // 如果優先度為空，使用預設值「中」
             if (!priority || priority === '') {
-                hasError = true;
-                if (prioritySelect) {
-                    prioritySelect.focus();
-                    prioritySelect.style.borderColor = '#e74c3c';
-                    setTimeout(() => {
-                        prioritySelect.style.borderColor = '';
-                    }, 2000);
-                }
-                return;
+                priority = 'medium';
             }
             
             const task = {
