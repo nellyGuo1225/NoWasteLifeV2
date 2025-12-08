@@ -1,7 +1,7 @@
 // API 配置 - 根據環境自動切換
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000'
-    : window.location.origin; // 生產環境使用相同域名
+    : 'https://nowastelifev2.onrender.com'; // 生產環境後端 URL
 
 // 數據模型
 let tasks = [];
