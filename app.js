@@ -921,6 +921,70 @@ function closeGachaModal() {
     }
 }
 
+// 測試後端服務器連接
+async function testBackendConnection() {
+    const healthUrl = `${API_BASE_URL}/health`;
+    console.log('測試後端連接:', healthUrl);
+    
+    try {
+        const response = await fetch(healthUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('健康檢查響應狀態:', response.status);
+        console.log('健康檢查響應標頭:', Object.fromEntries(response.headers.entries()));
+        
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('健康檢查失敗，響應內容:', text);
+            throw new Error(`後端服務器響應錯誤 (狀態碼: ${response.status})`);
+        }
+        
+        const data = await safeJsonParse(response);
+        console.log('後端服務器正常:', data);
+        return {
+            success: true,
+            data: data,
+            message: `✅ 後端服務器連接正常\n狀態: ${data.status}\nGemini 配置: ${data.gemini_configured ? '是' : '否'}`
+        };
+    } catch (error) {
+        console.error('後端連接測試失敗:', error);
+        return {
+            success: false,
+            error: error.message,
+            message: `❌ 無法連接到後端服務器\n錯誤: ${error.message}\nURL: ${healthUrl}`
+        };
+    }
+}
+
+// 全局測試連接函數（供按鈕調用）
+window.testConnection = async function() {
+    const resultDiv = document.getElementById('connection-test-result-diagnosis');
+    if (resultDiv) {
+        resultDiv.innerHTML = '測試中...';
+        const result = await testBackendConnection();
+        resultDiv.innerHTML = `<pre style="background: ${result.success ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${result.message}</pre>`;
+    } else {
+        const result = await testBackendConnection();
+        alert(result.message);
+    }
+};
+
+window.testConnectionBreakdown = async function() {
+    const resultDiv = document.getElementById('connection-test-result-breakdown');
+    if (resultDiv) {
+        resultDiv.innerHTML = '測試中...';
+        const result = await testBackendConnection();
+        resultDiv.innerHTML = `<pre style="background: ${result.success ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${result.message}</pre>`;
+    } else {
+        const result = await testBackendConnection();
+        alert(result.message);
+    }
+};
+
 // 安全地解析 JSON 響應
 async function safeJsonParse(response) {
     try {
@@ -1037,7 +1101,11 @@ async function startDiagnosis() {
         // 檢查是否是網絡連接錯誤
         else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             errorMessage = '無法連接到後端服務器';
-            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}`;
+            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}<br>
+                <button onclick="testConnection()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    測試後端連接
+                </button>
+                <div id="connection-test-result-diagnosis" style="margin-top: 10px;"></div>`;
         }
         // 檢查是否是配額限制錯誤
         else if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('配額')) {
@@ -1309,7 +1377,11 @@ async function breakdownTaskWithAI() {
         // 檢查是否是網絡連接錯誤
         else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             errorMessage = '無法連接到後端服務器';
-            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}`;
+            errorDetails = `請確認後端服務器已啟動並運行在 ${API_BASE_URL}<br>
+                <button onclick="testConnectionBreakdown()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    測試後端連接
+                </button>
+                <div id="connection-test-result-breakdown" style="margin-top: 10px;"></div>`;
         }
         
         if (resultDiv) {

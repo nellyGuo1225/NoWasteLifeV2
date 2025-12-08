@@ -25,17 +25,34 @@ app = Flask(__name__)
 
 # 獲取環境變數，支持生產環境
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8000')
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', f'{FRONTEND_URL},http://127.0.0.1:8000').split(',')
+ALLOWED_ORIGINS_ENV = os.getenv('ALLOWED_ORIGINS', '')
+
+# 構建允許的來源列表
+ALLOWED_ORIGINS = []
+if ALLOWED_ORIGINS_ENV:
+    ALLOWED_ORIGINS.extend([origin.strip() for origin in ALLOWED_ORIGINS_ENV.split(',')])
+else:
+    # 如果沒有設置，允許常見的本地和生產環境
+    ALLOWED_ORIGINS = [
+        FRONTEND_URL,
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'https://nowastelife.onrender.com',
+        'https://nowastelifev2.onrender.com',
+        # 允許所有 onrender.com 子域名（用於開發和測試）
+        'https://*.onrender.com'
+    ]
 
 # 配置 CORS，支持開發和生產環境
+# 使用更寬鬆的 CORS 配置，允許所有 onrender.com 域名
 CORS(app, resources={
     r"/api/*": {
-        "origins": ALLOWED_ORIGINS,
+        "origins": "*",  # 允許所有來源（生產環境可以根據需要限制）
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     },
     r"/health": {
-        "origins": ALLOWED_ORIGINS,
+        "origins": "*",  # 健康檢查端點允許所有來源
         "methods": ["GET", "OPTIONS"]
     }
 })
