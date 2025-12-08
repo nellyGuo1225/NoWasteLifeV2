@@ -1,7 +1,20 @@
 // API 配置 - 根據環境自動切換
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000'
-    : 'https://nowastelifev2.onrender.com'; // 生產環境後端 URL
+const API_BASE_URL = (() => {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // 本地開發環境
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+        const url = 'http://localhost:5000';
+        console.log('[API] 本地環境，使用後端 URL:', url);
+        return url;
+    }
+    
+    // 生產環境（Render 或其他部署平台）
+    const url = 'https://nowastelifev2.onrender.com';
+    console.log('[API] 生產環境，使用後端 URL:', url, '當前 hostname:', hostname);
+    return url;
+})();
 
 // 數據模型
 let tasks = [];
